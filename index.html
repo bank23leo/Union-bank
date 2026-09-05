@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Doom House | Receipt Generator</title>
+
+<style>
+*{box-sizing:border-box}
+
+body{
+    margin:0;
+    font-family:Arial,Helvetica,sans-serif;
+    background:#f3f5f8;
+    color:#18212b;
+}
+
+.container{
+    max-width:1100px;
+    margin:30px auto;
+    padding:15px;
+}
+
+.logo{
+    text-align:center;
+    margin-bottom:25px;
+}
+
+.logo h1{
+    margin:0;
+    font-size:34px;
+    letter-spacing:.5px;
+}
+
+.logo p{
+    margin:6px 0;
+    color:#707986;
+}
+
+.layout{
+    display:grid;
+    grid-template-columns:370px 1fr;
+    gap:25px;
+}
+
+/* FORM */
+
+.form{
+    background:#fff;
+    padding:25px;
+    border-radius:16px;
+    box-shadow:0 8px 30px rgba(0,0,0,.07);
+}
+
+.form h2{
+    margin-top:0;
+}
+
+label{
+    display:block;
+    margin-top:13px;
+    margin-bottom:6px;
+    font-size:13px;
+    font-weight:bold;
+}
+
+input,select{
+    width:100%;
+    padding:12px;
+    border:1px solid #d6dbe2;
+    border-radius:8px;
+    font-size:14px;
+}
+
+button{
+    width:100%;
+    border:0;
+    border-radius:9px;
+    padding:14px;
+    margin-top:18px;
+    background:#18212b;
+    color:white;
+    font-weight:bold;
+    font-size:15px;
+    cursor:pointer;
+}
+
+button:hover{
+    opacity:.9;
+}
+
+.print{
+    background:#e8ecf1;
+    color:#18212b;
+    margin-top:10px;
+}
+
+/* RECEIPT */
+
+.receipt{
+    background:#fff;
+    padding:38px;
+    border-radius:16px;
+    box-shadow:0 8px 30px rgba(0,0,0,.07);
+}
+
+.receipt-head{
+    display:flex;
+    justify-content:space-between;
+    border-bottom:2px solid #18212b;
+    padding-bottom:18px;
+}
+
+.receipt-head h2{
+    margin:0;
+    font-size:28px;
+}
+
+.receipt-head p{
+    margin:6px 0 0;
+    color:#747d89;
+}
+
+.receipt-id{
+    text-align:right;
+    font-size:12px;
+    color:#707986;
+}
+
+.amount{
+    text-align:center;
+    padding:25px 0;
+}
+
+.amount h3{
+    margin:0;
+    font-size:42px;
+}
+
+.status{
+    display:inline-block;
+    margin-top:9px;
+    padding:7px 15px;
+    border-radius:20px;
+    background:#edf1f5;
+    font-size:12px;
+    font-weight:bold;
+}
+
+.details{
+    width:100%;
+    border-collapse:collapse;
+}
+
+.details td{
+    padding:12px 6px;
+    border-bottom:1px solid #e7eaee;
+    font-size:14px;
+}
+
+.details td:first-child{
+    width:44%;
+    color:#6c7683;
+    font-weight:bold;
+}
+
+.money-box{
+    margin-top:20px;
+    border:1px solid #e0e4e9;
+    border-radius:9px;
+    overflow:hidden;
+}
+
+.money-row{
+    display:flex;
+    justify-content:space-between;
+    padding:13px 15px;
+    border-bottom:1px solid #e0e4e9;
+}
+
+.money-row:last-child{
+    border-bottom:0;
+    font-size:17px;
+    font-weight:bold;
+}
+
+.fee{
+    color:#a52b2b;
+}
+
+/* DEMO VERIFICATION STAMP */
+
+.stamp-area{
+    text-align:center;
+    margin-top:24px;
+}
+
+.verify-stamp{
+    width:105px;
+    height:105px;
+    margin:auto;
+    border:4px solid #b52b2b;
+    border-radius:50%;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+    color:#b52b2b;
+    font-size:12px;
+    line-height:1.25;
+    font-weight:900;
+    transform:rotate(-10deg);
+}
+
+.footer{
+    text-align:center;
+    margin-top:22px;
+    color:#7a838e;
+    font-size:10px;
+}
+
+@media(max-width:850px){
+    .layout{
+        grid-template-columns:1fr;
+    }
+
+    .receipt{
+        padding:22px;
+    }
+}
+
+@media print{
+
+    body{
+        background:#fff;
+    }
+
+    .logo,
+    .form{
+        display:none;
+    }
+
+    .container{
+        margin:0;
+        padding:0;
+    }
+
+    .receipt{
+        box-shadow:none;
+        border-radius:0;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="logo">
+    <h1>Doom House</h1>
+    <p>Receipt Generator</p>
+</div>
+
+
+<div class="layout">
+
+<!-- FORM -->
+
+<div class="form">
+
+<h2>Receipt Details</h2>
+
+<label>Sender Name</label>
+<input id="sender" placeholder="Sender name">
+
+<label>Sender Account Number</label>
+<input id="senderAccount" placeholder="Sender account number">
+
+<label>Receiver Name</label>
+<input id="receiver" placeholder="Receiver name">
+
+<label>Receiver Account Number</label>
+<input id="receiverAccount" placeholder="Receiver account number">
+
+<label>Receiver Country</label>
+<input id="country" placeholder="Receiver country">
+
+<label>Receiver Bank / Wallet Name</label>
+<input id="bank" placeholder="Bank / Wallet">
+
+<label>Amount Sent (USD)</label>
+<input id="amount" type="number" value="100">
+
+<label>Tax / Fee (USD)</label>
+<input id="fee" type="number" value="20">
+
+<label>Transaction ID</label>
+<input id="transaction" placeholder="DEMO-123456">
+
+<label>Date & Time</label>
+<input id="date" type="datetime-local">
+
+<label>Payment Status</label>
+<select id="status">
+    <option>Demo — Completed</option>
+    <option>Demo — Pending</option>
+    <option>Demo — Cancelled</option>
+</select>
+
+<button onclick="generateReceipt()">
+    Generate Receipt
+</button>
+
+<button class="print" onclick="window.print()">
+    Download / Print
+</button>
+
+</div>
+
+
+<!-- RECEIPT -->
+
+<div class="receipt">
+
+<div class="receipt-head">
+
+<div>
+    <h2>Doom House</h2>
+    <p>Transaction Receipt</p>
+</div>
+
+<div class="receipt-id">
+    Receipt No.<br>
+    <strong id="receiptNo">DEMO-000000</strong>
+</div>
+
+</div>
+
+
+<div class="amount">
+
+<h3>
+    $<span id="netAmount">80.00</span>
+</h3>
+
+<div class="status" id="paymentStatus">
+    Demo — Completed
+</div>
+
+</div>
+
+
+<table class="details">
+
+<tr>
+<td>Sender Name</td>
+<td id="rSender">—</td>
+</tr>
+
+<tr>
+<td>Sender Account Number</td>
+<td id="rSenderAccount">—</td>
+</tr>
+
+<tr>
+<td>Receiver Name</td>
+<td id="rReceiver">—</td>
+</tr>
+
+<tr>
+<td>Receiver Account Number</td>
+<td id="rReceiverAccount">—</td>
+</tr>
+
+<tr>
+<td>Receiver Country</td>
+<td id="rCountry">—</td>
+</tr>
+
+<tr>
+<td>Receiver Bank / Wallet</td>
+<td id="rBank">—</td>
+</tr>
+
+<tr>
+<td>Transaction ID</td>
+<td id="rTransaction">DEMO-123456</td>
+</tr>
+
+<tr>
+<td>Date & Time</td>
+<td id="rDate">—</td>
+</tr>
+
+</table>
+
+
+<div class="money-box">
+
+<div class="money-row">
+    <span>Amount Sent</span>
+    <span>$<span id="rAmount">100.00</span></span>
+</div>
+
+<div class="money-row fee">
+    <span>Tax / Fee</span>
+    <span>-$<span id="rFee">20.00</span></span>
+</div>
+
+<div class="money-row">
+    <span>Net Amount</span>
+    <span>$<span id="rNet">80.00</span></span>
+</div>
+
+</div>
+
+
+<!-- DEMO STAMP -->
+
+<div class="stamp-area">
+
+<div class="verify-stamp">
+    DEMO<br>
+    VERIFIED<br>
+    SAMPLE
+</div>
+
+</div>
+
+
+<div class="footer">
+    SAMPLE/DEMO • For demonstration and testing purposes only
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+
+<script>
+
+function value(id){
+    return document.getElementById(id).value.trim() || "—";
+}
+
+function money(number){
+    return Number(number || 0).toLocaleString("en-US",{
+        minimumFractionDigits:2,
+        maximumFractionDigits:2
+    });
+}
+
+function generateReceipt(){
+
+    const amount =
+        parseFloat(document.getElementById("amount").value) || 0;
+
+    const fee =
+        parseFloat(document.getElementById("fee").value) || 0;
+
+    const net =
+        Math.max(0, amount - fee);
+
+
+    document.getElementById("rSender").textContent =
+        value("sender");
+
+    document.getElementById("rSenderAccount").textContent =
+        value("senderAccount");
+
+    document.getElementById("rReceiver").textContent =
+        value("receiver");
+
+    document.getElementById("rReceiverAccount").textContent =
+        value("receiverAccount");
+
+    document.getElementById("rCountry").textContent =
+        value("country");
+
+    document.getElementById("rBank").textContent =
+        value("bank");
+
+    document.getElementById("rTransaction").textContent =
+        value("transaction");
+
+
+    document.getElementById("rAmount").textContent =
+        money(amount);
+
+    document.getElementById("rFee").textContent =
+        money(fee);
+
+    document.getElementById("rNet").textContent =
+        money(net);
+
+    document.getElementById("netAmount").textContent =
+        money(net);
+
+
+    document.getElementById("paymentStatus").textContent =
+        document.getElementById("status").value;
+
+
+    const dateValue =
+        document.getElementById("date").value;
+
+    if(dateValue){
+
+        document.getElementById("rDate").textContent =
+            new Date(dateValue).toLocaleString();
+
+    }else{
+
+        document.getElementById("rDate").textContent =
+            "—";
+
+    }
+
+
+    document.getElementById("receiptNo").textContent =
+        "DEMO-" +
+        Math.random()
+        .toString(36)
+        .substring(2,8)
+        .toUpperCase();
+}
+
+
+// Current date/time
+
+const now =
+    new Date(
+        Date.now() -
+        new Date().getTimezoneOffset()*60000
+    )
+    .toISOString()
+    .slice(0,16);
+
+document.getElementById("date").value = now;
+
+
+// Initial receipt
+
+generateReceipt();
+
+</script>
+
+</body>
+  </html>
