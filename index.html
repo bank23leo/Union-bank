@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Union Bank — Demo Receipt Generator</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="container">
+    <h1>Union Bank</h1>
+    <p class="demo-label">DEMO RECEIPT GENERATOR</p>
+
+    <div class="form-card">
+      <h2>Transaction Details</h2>
+
+      <label>Sender Name</label>
+      <input id="senderName" placeholder="Demo Sender">
+
+      <label>Sender Account Number</label>
+      <input id="senderAccount" placeholder="XXXX-XXXX-XXXX">
+
+      <label>Receiver Name</label>
+      <input id="receiverName" placeholder="Demo Receiver">
+
+      <label>Receiver Account Number</label>
+      <input id="receiverAccount" placeholder="XXXX-XXXX-XXXX">
+
+      <label>Receiver Country</label>
+      <input id="country" placeholder="United States">
+
+      <label>Receiver Bank / Wallet</label>
+      <input id="bank" placeholder="Demo Bank / Wallet">
+
+      <label>Amount (USD)</label>
+      <input id="amount" type="number" placeholder="1250">
+
+      <label>Date & Time</label>
+      <input id="dateTime" type="datetime-local">
+
+      <button onclick="generateReceipt()">Generate Demo Receipt</button>
+    </div>
+
+    <div id="receipt" class="receipt hidden">
+      <div class="watermark">DEMO ONLY</div>
+
+      <div class="receipt-header">
+        <h2>UNION BANK</h2>
+        <span>DEMO / SAMPLE</span>
+      </div>
+
+      <div class="warning">
+        NOT A REAL BANK DOCUMENT — FOR DEMONSTRATION ONLY
+      </div>
+
+      <h3>Transfer Details</h3>
+
+      <div class="row">
+        <span>Sender Name</span>
+        <strong id="rSender"></strong>
+      </div>
+
+      <div class="row">
+        <span>Sender Account</span>
+        <strong id="rSenderAccount"></strong>
+      </div>
+
+      <hr>
+
+      <div class="row">
+        <span>Receiver Name</span>
+        <strong id="rReceiver"></strong>
+      </div>
+
+      <div class="row">
+        <span>Receiver Account</span>
+        <strong id="rReceiverAccount"></strong>
+      </div>
+
+      <div class="row">
+        <span>Receiver Country</span>
+        <strong id="rCountry"></strong>
+      </div>
+
+      <div class="row">
+        <span>Bank / Wallet</span>
+        <strong id="rBank"></strong>
+      </div>
+
+      <hr>
+
+      <div class="amount">
+        <small>DEMO AMOUNT</small>
+        <strong id="rAmount">USD $0.00</strong>
+      </div>
+
+      <div class="row">
+        <span>Transaction ID</span>
+        <strong id="transactionId"></strong>
+      </div>
+
+      <div class="row">
+        <span>Date & Time</span>
+        <strong id="rDate"></strong>
+      </div>
+
+      <div class="status">
+        SAMPLE / DEMO
+      </div>
+
+      <div class="actions">
+        <button onclick="window.print()">Print Demo</button>
+        <button onclick="window.print()">Save as PDF</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
