@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Doom House - Receipt Generator</title>
+
+<style>
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    font-family:Arial,Helvetica,sans-serif;
+    background:#eef2f7;
+    color:#17202a;
+}
+
+.wrapper{
+    max-width:1100px;
+    margin:30px auto;
+    padding:15px;
+}
+
+.header{
+    text-align:center;
+    margin-bottom:25px;
+}
+
+.header h1{
+    margin:0;
+    font-size:34px;
+    font-weight:800;
+}
+
+.header p{
+    margin-top:7px;
+    color:#697586;
+}
+
+.main{
+    display:grid;
+    grid-template-columns:380px 1fr;
+    gap:25px;
+}
+
+.form-box,
+.receipt{
+    background:white;
+    border-radius:18px;
+    box-shadow:0 10px 35px rgba(0,0,0,.08);
+}
+
+.form-box{
+    padding:25px;
+}
+
+.form-box h2{
+    margin-top:0;
+}
+
+label{
+    display:block;
+    margin-top:14px;
+    margin-bottom:6px;
+    font-size:13px;
+    font-weight:bold;
+}
+
+input,
+select{
+    width:100%;
+    padding:12px;
+    border:1px solid #d7dce3;
+    border-radius:8px;
+    font-size:14px;
+    outline:none;
+}
+
+input:focus,
+select:focus{
+    border-color:#17202a;
+}
+
+button{
+    width:100%;
+    padding:14px;
+    margin-top:18px;
+    border:0;
+    border-radius:9px;
+    background:#17202a;
+    color:white;
+    font-size:15px;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+button:hover{
+    opacity:.9;
+}
+
+.print-btn{
+    background:#e7ebf0;
+    color:#17202a;
+    margin-top:10px;
+}
+
+/* RECEIPT */
+
+.receipt{
+    padding:35px;
+    position:relative;
+    overflow:hidden;
+}
+
+.demo-banner{
+    background:#fff1f1;
+    border:1px solid #e0aaaa;
+    color:#9c2222;
+    padding:10px;
+    border-radius:8px;
+    text-align:center;
+    font-size:12px;
+    font-weight:bold;
+    margin-bottom:22px;
+}
+
+.receipt-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    border-bottom:2px solid #17202a;
+    padding-bottom:18px;
+}
+
+.receipt-header h2{
+    margin:0;
+    font-size:27px;
+}
+
+.receipt-header p{
+    margin:5px 0 0;
+    color:#697586;
+}
+
+.receipt-number{
+    text-align:right;
+    font-size:12px;
+    color:#697586;
+}
+
+.amount-section{
+    text-align:center;
+    padding:25px 0;
+}
+
+.amount-section h3{
+    margin:0;
+    font-size:42px;
+}
+
+.status{
+    display:inline-block;
+    margin-top:10px;
+    padding:7px 15px;
+    border-radius:30px;
+    background:#eef2f7;
+    font-size:12px;
+    font-weight:bold;
+}
+
+.details{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:10px;
+}
+
+.details td{
+    padding:13px 7px;
+    border-bottom:1px solid #e6e9ee;
+    font-size:14px;
+}
+
+.details td:first-child{
+    width:45%;
+    color:#697586;
+    font-weight:bold;
+}
+
+.total-box{
+    margin-top:20px;
+    border:1px solid #e1e5ea;
+    border-radius:10px;
+    overflow:hidden;
+}
+
+.total-row{
+    display:flex;
+    justify-content:space-between;
+    padding:12px 15px;
+    border-bottom:1px solid #e6e9ee;
+}
+
+.total-row:last-child{
+    border-bottom:0;
+    font-weight:bold;
+    font-size:17px;
+}
+
+.tax{
+    color:#a32929;
+}
+
+.watermark{
+    position:absolute;
+    top:48%;
+    left:50%;
+    transform:translate(-50%,-50%) rotate(-25deg);
+    font-size:70px;
+    font-weight:900;
+    color:rgba(190,30,30,.06);
+    pointer-events:none;
+    white-space:nowrap;
+}
+
+.footer{
+    text-align:center;
+    margin-top:25px;
+    color:#7b8490;
+    font-size:11px;
+    line-height:1.5;
+}
+
+@media(max-width:850px){
+    .main{
+        grid-template-columns:1fr;
+    }
+
+    .receipt{
+        padding:22px;
+    }
+}
+
+@media print{
+    body{
+        background:white;
+    }
+
+    .header,
+    .form-box,
+    .demo-banner{
+        display:none;
+    }
+
+    .wrapper{
+        margin:0;
+        padding:0;
+    }
+
+    .receipt{
+        box-shadow:none;
+        border-radius:0;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="wrapper">
+
+<div class="header">
+    <h1>Doom House</h1>
+    <p>Professional Sample Receipt Generator</p>
+</div>
+
+<div class="main">
+
+<!-- FORM -->
+
+<div class="form-box">
+
+<h2>Receipt Details</h2>
+
+<label>Sender Name</label>
+<input id="senderName" placeholder="Enter sender name">
+
+<label>Sender Account Number</label>
+<input id="senderAccount" placeholder="Enter sender account">
+
+<label>Receiver Name</label>
+<input id="receiverName" placeholder="Enter receiver name">
+
+<label>Receiver Account Number</label>
+<input id="receiverAccount" placeholder="Enter receiver account">
+
+<label>Receiver Country</label>
+<input id="country" placeholder="Enter country">
+
+<label>Receiver Bank / Wallet</label>
+<input id="bank" placeholder="Bank or Wallet">
+
+<label>Amount (USD)</label>
+<input id="amount" type="number" value="100">
+
+<label>Tax / Fee (USD)</label>
+<input id="tax" type="number" value="20">
+
+<label>Transaction ID</label>
+<input id="transaction" placeholder="DEMO-123456">
+
+<label>Date & Time</label>
+<input id="datetime" type="datetime-local">
+
+<label>Payment Status</label>
+<select id="status">
+    <option>Sample / Demo</option>
+    <option>Pending — Demo</option>
+    <option>Completed — Demo</option>
+</select>
+
+<button onclick="generateReceipt()">
+    Generate Receipt
+</button>
+
+<button class="print-btn" onclick="window.print()">
+    Download / Print PDF
+</button>
+
+</div>
+
+
+<!-- RECEIPT -->
+
+<div class="receipt" id="receipt">
+
+<div class="watermark">
+    SAMPLE
+</div>
+
+<div class="demo-banner">
+    SAMPLE / DEMO RECEIPT — NOT PROOF OF PAYMENT
+</div>
+
+<div class="receipt-header">
+
+<div>
+    <h2>Doom House</h2>
+    <p>Transaction Receipt</p>
+</div>
+
+<div class="receipt-number">
+    Receipt No.<br>
+    <strong id="receiptNo">DEMO-000000</strong>
+</div>
+
+</div>
+
+
+<div class="amount-section">
+
+<h3>
+    $<span id="displayNet">80.00</span>
+</h3>
+
+<div class="status" id="displayStatus">
+    Sample / Demo
+</div>
+
+</div>
+
+
+<table class="details">
+
+<tr>
+<td>Sender Name</td>
+<td id="displaySender">—</td>
+</tr>
+
+<tr>
+<td>Sender Account Number</td>
+<td id="displaySenderAccount">—</td>
+</tr>
+
+<tr>
+<td>Receiver Name</td>
+<td id="displayReceiver">—</td>
+</tr>
+
+<tr>
+<td>Receiver Account Number</td>
+<td id="displayReceiverAccount">—</td>
+</tr>
+
+<tr>
+<td>Receiver Country</td>
+<td id="displayCountry">—</td>
+</tr>
+
+<tr>
+<td>Receiver Bank / Wallet</td>
+<td id="displayBank">—</td>
+</tr>
+
+<tr>
+<td>Transaction ID</td>
+<td id="displayTransaction">DEMO-123456</td>
+</tr>
+
+<tr>
+<td>Date & Time</td>
+<td id="displayDate">—</td>
+</tr>
+
+</table>
+
+
+<div class="total-box">
+
+<div class="total-row">
+    <span>Amount Sent</span>
+    <span>$<span id="displayAmount">100.00</span></span>
+</div>
+
+<div class="total-row tax">
+    <span>Tax / Fee</span>
+    <span>-$<span id="displayTax">20.00</span></span>
+</div>
+
+<div class="total-row">
+    <span>Net Amount</span>
+    <span>$<span id="displayNet2">80.00</span></span>
+</div>
+
+</div>
+
+
+<div class="footer">
+
+<strong>SAMPLE / DEMO ONLY</strong><br>
+This receipt is generated for demonstration and testing purposes.
+It does not verify or confirm any real financial transaction.
+
+</div>
+
+</div>
+
+</div>
+</div>
+
+
+<script>
+
+function getValue(id){
+
+    const value = document.getElementById(id).value.trim();
+
+    return value || "—";
+
+}
+
+
+function money(value){
+
+    return Number(value || 0).toLocaleString(
+        "en-US",
+        {
+            minimumFractionDigits:2,
+            maximumFractionDigits:2
+        }
+    );
+
+}
+
+
+function generateReceipt(){
+
+    const amount =
+        parseFloat(document.getElementById("amount").value) || 0;
+
+    const tax =
+        parseFloat(document.getElementById("tax").value) || 0;
+
+    const net =
+        Math.max(0, amount - tax);
+
+
+    document.getElementById("displaySender").textContent =
+        getValue("senderName");
+
+    document.getElementById("displaySenderAccount").textContent =
+        getValue("senderAccount");
+
+    document.getElementById("displayReceiver").textContent =
+        getValue("receiverName");
+
+    document.getElementById("displayReceiverAccount").textContent =
+        getValue("receiverAccount");
+
+    document.getElementById("displayCountry").textContent =
+        getValue("country");
+
+    document.getElementById("displayBank").textContent =
+        getValue("bank");
+
+    document.getElementById("displayTransaction").textContent =
+        getValue("transaction");
+
+    document.getElementById("displayAmount").textContent =
+        money(amount);
+
+    document.getElementById("displayTax").textContent =
+        money(tax);
+
+    document.getElementById("displayNet").textContent =
+        money(net);
+
+    document.getElementById("displayNet2").textContent =
+        money(net);
+
+
+    document.getElementById("displayStatus").textContent =
+        document.getElementById("status").value;
+
+
+    const dateValue =
+        document.getElementById("datetime").value;
+
+    if(dateValue){
+
+        const date = new Date(dateValue);
+
+        document.getElementById("displayDate").textContent =
+            date.toLocaleString();
+
+    }else{
+
+        document.getElementById("displayDate").textContent =
+            "—";
+
+    }
+
+
+    const randomID =
+        "DEMO-" +
+        Math.random()
+        .toString(36)
+        .substring(2,8)
+        .toUpperCase();
+
+    document.getElementById("receiptNo").textContent =
+        randomID;
+
+}
+
+
+// Default date/time
+
+const now =
+    new Date(
+        Date.now() -
+        new Date().getTimezoneOffset()*60000
+    )
+    .toISOString()
+    .slice(0,16);
+
+document.getElementById("datetime").value = now;
+
+
+// Generate default receipt
+
+generateReceipt();
+
+</script>
+
+</body>
+                        </html>
