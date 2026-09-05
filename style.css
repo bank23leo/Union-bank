@@ -1,0 +1,192 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f1f3f6;
+  color: #222;
+}
+
+.container {
+  max-width: 650px;
+  margin: 30px auto;
+  padding: 20px;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 5px;
+}
+
+.demo-label {
+  text-align: center;
+  font-weight: bold;
+  letter-spacing: 2px;
+}
+
+.form-card,
+.receipt {
+  background: white;
+  padding: 25px;
+  border-radius: 14px;
+  margin-top: 20px;
+  box-shadow: 0 5px 25px rgba(0,0,0,.08);
+}
+
+label {
+  display: block;
+  margin-top: 15px;
+  font-weight: bold;
+}
+
+input {
+  width: 100%;
+  padding: 12px;
+  margin-top: 6px;
+  border: 1px solid #ccc;
+  border-radius: 7px;
+  font-size: 15px;
+}
+
+button {
+  width: 100%;
+  padding: 13px;
+  margin-top: 20px;
+  border: 0;
+  border-radius: 7px;
+  background: #222;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.receipt {
+  position: relative;
+  overflow: hidden;
+}
+
+.receipt-header {
+  text-align: center;
+}
+
+.receipt-header h2 {
+  margin-bottom: 5px;
+}
+
+.receipt-header span {
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.warning {
+  margin: 20px 0;
+  padding: 10px;
+  border: 2px dashed #555;
+  text-align: center;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 10px 0;
+}
+
+.row span {
+  color: #666;
+}
+
+.row strong {
+  text-align: right;
+  word-break: break-word;
+}
+
+.amount {
+  text-align: center;
+  padding: 20px 0;
+}
+
+.amount small {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.amount strong {
+  font-size: 28px;
+}
+
+.status {
+  margin-top: 20px;
+  padding: 12px;
+  text-align: center;
+  border: 2px solid #555;
+  font-weight: bold;
+}
+
+.watermark {
+  position: absolute;
+  top: 45%;
+  left: 5%;
+  font-size: 55px;
+  font-weight: bold;
+  opacity: .07;
+  transform: rotate(-25deg);
+  pointer-events: none;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+}
+
+.actions button {
+  flex: 1;
+}
+
+.hidden {
+  display: none;
+}
+
+@media (max-width: 500px) {
+  .container {
+    padding: 10px;
+  }
+
+  .row {
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .row strong {
+    text-align: left;
+  }
+
+  .actions {
+    flex-direction: column;
+  }
+}
+
+@media print {
+  body {
+    background: white;
+  }
+
+  .form-card,
+  .actions,
+  .demo-label {
+    display: none;
+  }
+
+  .container {
+    margin: 0;
+    max-width: 100%;
+  }
+
+  .receipt {
+    box-shadow: none;
+  }
+}
