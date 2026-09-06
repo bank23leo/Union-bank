@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bank Receipt Generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  :root{
+    --navy:#0E2A3D;
+    --navy-deep:#081A26;
+    --teal:#1B6B63;
+    --gold:#B98B3E;
+    --paper:#FBF8F2;
+    --paper-line:#E4DECF;
+    --ink:#1C2226;
+    --ink-soft:#5B6670;
+    --danger:#9B3B2E;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Inter',sans-serif;
+    background:var(--navy-deep);
+    color:var(--ink);
+    min-height:100vh;
+  }
+  .app{
+    display:grid;
+    grid-template-columns: 420px 1fr;
+    min-height:100vh;
+  }
+  @media (max-width: 920px){
+    .app{grid-template-columns:1fr;}
+  }
+
+  /* ---------- FORM PANEL ---------- */
+  .panel{
+    background:var(--navy);
+    color:#EAF1F0;
+    padding:40px 36px;
+  }
+  .panel-header{margin-bottom:28px;}
+  .panel-header .eyebrow{
+    color:var(--gold);
+    font-size:13px;
+    letter-spacing:0.02em;
+    font-weight:600;
+  }
+  .panel-header h1{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:28px;
+    margin:6px 0 8px;
+    line-height:1.15;
+  }
+  .panel-header p{
+    color:#9FB3B0;
+    font-size:14px;
+    line-height:1.5;
+    margin:0;
+  }
+
+  fieldset{
+    border:none;
+    padding:0;
+    margin:0 0 26px;
+  }
+  legend{
+    font-family:'Fraunces',serif;
+    font-size:15px;
+    color:var(--gold);
+    padding:0 0 10px;
+    width:100%;
+    border-bottom:1px solid rgba(255,255,255,0.14);
+    margin-bottom:16px;
+  }
+  .field{margin-bottom:14px;}
+  .field label{
+    display:block;
+    font-size:12.5px;
+    color:#B7C7C4;
+    margin-bottom:6px;
+  }
+  .row-2{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+  }
+  input, textarea, select{
+    width:100%;
+    background:rgba(255,255,255,0.06);
+    border:1px solid rgba(255,255,255,0.16);
+    border-radius:4px;
+    padding:10px 12px;
+    color:#F4F7F6;
+    font-family:'Inter',sans-serif;
+    font-size:14px;
+    transition:border-color .15s ease, background .15s ease;
+  }
+  input::placeholder, textarea::placeholder{color:#6D8582;}
+  input:focus, textarea:focus, select:focus{
+    outline:none;
+    border-color:var(--gold);
+    background:rgba(255,255,255,0.09);
+  }
+  textarea{resize:vertical; min-height:56px;}
+
+  select{
+    appearance:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23B98B3E'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;
+    background-position:right 12px center;
+  }
+
+  .theme-row{display:flex; gap:10px; margin-bottom:26px;}
+  .swatch{
+    width:34px;height:34px;border-radius:50%;
+    cursor:pointer;
+    border:2px solid transparent;
+    position:relative;
+  }
+  .swatch.active{border-color:#fff;}
+  .swatch[data-theme="teal"]{background:linear-gradient(135deg,#0E2A3D,#1B6B63);}
+  .swatch[data-theme="wine"]{background:linear-gradient(135deg,#3D0E1E,#9B3B2E);}
+  .swatch[data-theme="forest"]{background:linear-gradient(135deg,#0E2A1A,#2E7D4F);}
+  .swatch[data-theme="slate"]{background:linear-gradient(135deg,#1F2937,#4B5563);}
+
+  .actions{display:flex; gap:10px; margin-top:8px;}
+  button{
+    font-family:'Inter',sans-serif;
+    font-weight:600;
+    font-size:14px;
+    border-radius:4px;
+    padding:12px 18px;
+    cursor:pointer;
+    border:1px solid transparent;
+    transition:transform .1s ease, background .15s ease;
+  }
+  button:active{transform:scale(0.98);}
+  .btn-primary{
+    background:var(--gold);
+    color:var(--navy-deep);
+    flex:1;
+  }
+  .btn-primary:hover{background:#C9A052;}
+  .btn-secondary{
+    background:transparent;
+    border:1px solid rgba(255,255,255,0.25);
+    color:#EAF1F0;
+  }
+  .btn-secondary:hover{border-color:#fff;}
+
+  /* ---------- PREVIEW PANEL ---------- */
+  .preview-wrap{
+    background:#050D13;
+    padding:48px 32px;
+    display:flex;
+    justify-content:center;
+    align-items:flex-start;
+  }
+  #receipt{
+    width:100%;
+    max-width:560px;
+    background:var(--paper);
+    color:var(--ink);
+    box-shadow:0 24px 60px rgba(0,0,0,0.45);
+    position:relative;
+    font-family:'Inter',sans-serif;
+  }
+  .r-band{
+    background:var(--navy);
+    color:#fff;
+    padding:26px 32px 22px;
+    position:relative;
+    overflow:hidden;
+  }
+  .r-band::after{
+    content:"";
+    position:absolute;
+    right:-40px; top:-40px;
+    width:160px; height:160px;
+    border-radius:50%;
+    background:rgba(255,255,255,0.05);
+  }
+  .r-band-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    position:relative;
+    z-index:1;
+  }
+  .bank-name{
+    font-family:'Fraunces',serif;
+    font-size:23px;
+    font-weight:600;
+    letter-spacing:0.01em;
+  }
+  .bank-tag{
+    font-size:11.5px;
+    color:var(--gold);
+    margin-top:2px;
+    letter-spacing:0.03em;
+  }
+  .r-badge{
+    text-align:right;
+  }
+  .r-badge .label{
+    font-size:10.5px;
+    color:#A9BEBB;
+  }
+  .r-badge .value{
+    font-family:'Space Mono',monospace;
+    font-size:13px;
+    color:#fff;
+  }
+  .status-pill{
+    display:inline-block;
+    margin-top:14px;
+    padding:5px 14px;
+    border-radius:20px;
+    background:rgba(255,255,255,0.12);
+    border:1px solid rgba(255,255,255,0.3);
+    font-size:11.5px;
+    letter-spacing:0.04em;
+    position:relative;
+    z-index:1;
+  }
+  .status-pill.success{color:#8FE3B0;}
+  .status-pill.pending{color:#F0CE7A;}
+  .status-pill.failed{color:#F0A38F;}
+
+  .r-amount{
+    padding:28px 32px 24px;
+    text-align:center;
+    border-bottom:1px dashed var(--paper-line);
+  }
+  .r-amount .lbl{
+    font-size:12px;
+    color:var(--ink-soft);
+    margin-bottom:6px;
+  }
+  .r-amount .amt{
+    font-family:'Fraunces',serif;
+    font-size:42px;
+    font-weight:600;
+    color:var(--navy);
+    line-height:1;
+  }
+  .r-amount .words{
+    font-size:12.5px;
+    color:var(--ink-soft);
+    margin-top:8px;
+    font-style:italic;
+  }
+  .fee-breakdown{
+    margin-top:16px;
+    padding-top:14px;
+    border-top:1px solid var(--paper-line);
+    max-width:280px;
+    margin-left:auto;
+    margin-right:auto;
+  }
+  .fee-row{
+    display:flex;
+    justify-content:space-between;
+    font-size:12.5px;
+    padding:4px 0;
+    color:var(--ink);
+  }
+  .fee-row.deduct{
+    color:var(--danger);
+  }
+
+  .r-body{padding:24px 32px 8px;}
+  .r-section-title{
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+    color:var(--teal);
+    font-weight:700;
+    margin-bottom:12px;
+  }
+  .r-parties{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+    margin-bottom:22px;
+  }
+  .party h4{
+    margin:0 0 6px;
+    font-size:13.5px;
+    color:var(--ink);
+  }
+  .party p{
+    margin:0;
+    font-size:12px;
+    color:var(--ink-soft);
+    line-height:1.6;
+  }
+  .r-details{margin-bottom:6px;}
+  .detail-row{
+    display:flex;
+    justify-content:space-between;
+    padding:9px 0;
+    border-bottom:1px solid var(--paper-line);
+    font-size:13px;
+  }
+  .detail-row .k{color:var(--ink-soft);}
+  .detail-row .v{
+    font-family:'Space Mono',monospace;
+    font-size:12.5px;
+    text-align:right;
+    max-width:60%;
+  }
+  .r-note{
+    padding:16px 32px 0;
+    font-size:12px;
+    color:var(--ink-soft);
+    font-style:italic;
+  }
+
+  .r-footer{
+    padding:20px 32px 28px;
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+  }
+  .seal{
+    width:76px;height:76px;
+    border-radius:50%;
+    border:2px solid var(--gold);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    color:var(--gold);
+    font-family:'Fraunces',serif;
+    font-size:10px;
+    line-height:1.3;
+    letter-spacing:0.03em;
+    transform:rotate(-8deg);
+    opacity:0.85;
+  }
+  .footer-note{
+    text-align:right;
+    font-size:10.5px;
+    color:var(--ink-soft);
+    max-width:60%;
+  }
+  .perforation{
+    height:14px;
+    background:
+      radial-gradient(circle at 8px 7px, #050D13 6px, transparent 7px) repeat-x;
+    background-size:16px 14px;
+    background-position:0 center;
+    margin-top:-1px;
+  }
+
+  @media print{
+    body *{visibility:hidden;}
+    #receipt, #receipt *{visibility:visible;}
+    #receipt{position:absolute; left:0; top:0; box-shadow:none; max-width:100%;}
+    .perforation, .panel, .preview-wrap{display:none;}
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- FORM PANEL -->
+  <div class="panel">
+    <div class="panel-header">
+      <div class="eyebrow">Receipt Generator</div>
+      <h1>Build your bank receipt</h1>
+      <p>Fill in sender and receiver details. The preview on the right updates as you type.</p>
+    </div>
+
+    <fieldset>
+      <legend>Bank details</legend>
+      <div class="field">
+        <label for="bankName">Bank name</label>
+        <input id="bankName" placeholder="e.g. Meridian National Bank" value="Meridian National Bank">
+      </div>
+      <div class="field">
+        <label for="bankTag">Tagline / branch</label>
+        <input id="bankTag" placeholder="e.g. Main Branch · Trusted since 1998" value="Main Branch · Digital Transfer">
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Transaction</legend>
+      <div class="row-2">
+        <div class="field">
+          <label for="txnId">Transaction ID</label>
+          <input id="txnId" placeholder="Auto-generated">
+        </div>
+        <div class="field">
+          <label for="txnDate">Date &amp; time</label>
+          <input id="txnDate" type="datetime-local">
+        </div>
+      </div>
+      <div class="row-2">
+        <div class="field">
+          <label for="amount">Amount sent</label>
+          <input id="amount" type="number" placeholder="0.00" value="50.00">
+        </div>
+        <div class="field">
+          <label for="currency">Currency</label>
+          <select id="currency">
+            <option value="$">USD ($)</option>
+            <option value="₹">INR (₹)</option>
+            <option value="€">EUR (€)</option>
+            <option value="£">GBP (£)</option>
+            <option value="﷼">PKR (Rs)</option>
+          </select>
+        </div>
+      </div>
+      <div class="row-2">
+        <div class="field">
+          <label for="fee">Fee / tax deducted</label>
+          <input id="fee" type="number" placeholder="0.00" value="12.78">
+        </div>
+        <div class="field">
+          <label for="feeLabel">Fee label</label>
+          <input id="feeLabel" placeholder="e.g. Service fee" value="Service fee">
+        </div>
+      </div>
+      <div class="field">
+        <label for="status">Status</label>
+        <select id="status">
+          <option value="success">Successful</option>
+          <option value="pending">Pending</option>
+          <option value="failed">Failed</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="mode">Payment mode</label>
+        <select id="mode">
+          <option>IMPS</option>
+          <option>NEFT</option>
+          <option>RTGS</option>
+          <option>UPI</option>
+          <option>Wire Transfer</option>
+          <option>Cheque</option>
+        </select>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Sender</legend>
+      <div class="field">
+        <label for="senderName">Full name</label>
+        <input id="senderName" placeholder="e.g. Arjun Mehta" value="Arjun Mehta">
+      </div>
+      <div class="field">
+        <label for="senderAcc">Account number</label>
+        <input id="senderAcc" placeholder="XXXX XXXX 1234" value="4521 0098 7712">
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Receiver</legend>
+      <div class="field">
+        <label for="receiverName">Full name</label>
+        <input id="receiverName" placeholder="e.g. Priya Nair" value="Priya Nair">
+      </div>
+      <div class="field">
+        <label for="receiverAcc">Account number</label>
+        <input id="receiverAcc" placeholder="XXXX XXXX 5678" value="7789 0021 5643">
+      </div>
+      <div class="field">
+        <label for="receiverBank">Receiver's bank / wallet</label>
+        <input id="receiverBank" placeholder="e.g. Chase Bank, Payoneer, Easypaisa, JazzCash">
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Note</legend>
+      <div class="field">
+        <textarea id="note" placeholder="Remarks / narration (optional)">For consultation services rendered.</textarea>
+      </div>
+    </fieldset>
+
+    <div class="theme-row" id="themeRow">
+      <div class="swatch active" data-theme="teal"></div>
+      <div class="swatch" data-theme="wine"></div>
+      <div class="swatch" data-theme="forest"></div>
+      <div class="swatch" data-theme="slate"></div>
+    </div>
+
+    <div class="actions">
+      <button class="btn-secondary" id="resetBtn">Reset</button>
+      <button class="btn-primary" id="downloadBtn">Download as PDF</button>
+    </div>
+  </div>
+
+  <!-- PREVIEW PANEL -->
+  <div class="preview-wrap">
+    <div id="receipt">
+      <div class="r-band">
+        <div class="r-band-top">
+          <div>
+            <div class="bank-name" id="p-bankName">Meridian National Bank</div>
+            <div class="bank-tag" id="p-bankTag">Main Branch · Digital Transfer</div>
+          </div>
+          <div class="r-badge">
+            <div class="label">Receipt No.</div>
+            <div class="value" id="p-txnId">TXN-000000</div>
+          </div>
+        </div>
+        <div class="status-pill success" id="p-status">Successful</div>
+      </div>
+
+      <div class="r-amount">
+        <div class="lbl">Amount received</div>
+        <div class="amt" id="p-amount">$37.22</div>
+        <div class="words" id="p-words">Thirty-seven dollars and twenty-two cents only</div>
+        <div class="fee-breakdown">
+          <div class="fee-row"><span>Amount sent</span><span id="p-sent">$50.00</span></div>
+          <div class="fee-row deduct"><span id="p-feeLabel">Service fee</span><span id="p-fee">− $12.78</span></div>
+        </div>
+      </div>
+
+      <div class="r-body">
+        <div class="r-parties">
+          <div class="party">
+            <div class="r-section-title">From</div>
+            <h4 id="p-senderName">Arjun Mehta</h4>
+            <p>A/C: <span id="p-senderAcc">4521 0098 7712</span></p>
+          </div>
+          <div class="party">
+            <div class="r-section-title">To</div>
+            <h4 id="p-receiverName">Priya Nair</h4>
+            <p>A/C: <span id="p-receiverAcc">7789 0021 5643</span></p>
+            <p id="p-receiverBankWrap" style="display:none;"><span id="p-receiverBank"></span></p>
+          </div>
+        </div>
+
+        <div class="r-section-title">Transaction details</div>
+        <div class="r-details">
+          <div class="detail-row"><span class="k">Date &amp; time</span><span class="v" id="p-date">—</span></div>
+          <div class="detail-row"><span class="k">Payment mode</span><span class="v" id="p-mode">IMPS</span></div>
+          <div class="detail-row"><span class="k">Reference ID</span><span class="v" id="p-ref">—</span></div>
+        </div>
+      </div>
+
+      <div class="r-note">Note: <span id="p-note">For consultation services rendered.</span></div>
+
+      <div class="r-footer">
+        <div class="seal">VERIFIED<br>PAYMENT</div>
+        <div class="footer-note">This is a computer-generated receipt and does not require a physical signature.</div>
+      </div>
+      <div class="perforation"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+
+const themes = {
+  teal:   {navy:'#0E2A3D', teal:'#1B6B63', gold:'#B98B3E'},
+  wine:   {navy:'#3D0E1E', teal:'#9B3B2E', gold:'#D9A441'},
+  forest: {navy:'#0E2A1A', teal:'#2E7D4F', gold:'#C9A551'},
+  slate:  {navy:'#1F2937', teal:'#4B5563', gold:'#C2A46B'}
+};
+
+function applyTheme(name){
+  const t = themes[name];
+  document.documentElement.style.setProperty('--navy', t.navy);
+  document.documentElement.style.setProperty('--teal', t.teal);
+  document.documentElement.style.setProperty('--gold', t.gold);
+}
+
+document.querySelectorAll('.swatch').forEach(sw=>{
+  sw.addEventListener('click', ()=>{
+    document.querySelectorAll('.swatch').forEach(s=>s.classList.remove('active'));
+    sw.classList.add('active');
+    applyTheme(sw.dataset.theme);
+  });
+});
+
+function genTxnId(){
+  return 'TXN' + Date.now().toString().slice(-9);
+}
+function genRef(){
+  return Math.random().toString(36).slice(2,10).toUpperCase();
+}
+
+const ones = ['','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'];
+const tens = ['','','twenty','thirty','forty','fifty','sixty','seventy','eighty','ninety'];
+
+function numToWords(n){
+  n = Math.floor(n);
+  if(n === 0) return 'zero';
+  function chunkWords(num){
+    let words = '';
+    if(num >= 100){
+      words += ones[Math.floor(num/100)] + ' hundred ';
+      num %= 100;
+    }
+    if(num >= 20){
+      words += tens[Math.floor(num/10)] + (num % 10 ? '-' + ones[num % 10] : '');
+    } else if (num > 0){
+      words += ones[num];
+    }
+    return words.trim();
+  }
+  const units = ['', 'thousand', 'million', 'billion'];
+  let unitIndex = 0;
+  let result = [];
+  while(n > 0){
+    const rem = n % 1000;
+    if(rem){
+      result.unshift(chunkWords(rem) + (units[unitIndex] ? ' ' + units[unitIndex] : ''));
+    }
+    n = Math.floor(n / 1000);
+    unitIndex++;
+  }
+  return result.join(', ').trim();
+}
+
+function currencyName(sym){
+  return {'₹':'rupees', '$':'dollars', '€':'euros', '£':'pounds', '﷼':'rupees'}[sym] || '';
+}
+
+function formatMoney(num, sym){
+  return sym + Number(num || 0).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+
+function render(){
+  $('p-bankName').textContent = $('bankName').value || 'Bank Name';
+  $('p-bankTag').textContent = $('bankTag').value || '';
+  $('p-txnId').textContent = $('txnId').value || genTxnId();
+
+  const status = $('status').value;
+  const statusLabelMap = {success:'Successful', pending:'Pending', failed:'Failed'};
+  const pill = $('p-status');
+  pill.textContent = statusLabelMap[status];
+  pill.className = 'status-pill ' + status;
+
+  const sym = $('currency').value;
+  const sentAmt = parseFloat($('amount').value) || 0;
+  const feeAmt = parseFloat($('fee').value) || 0;
+  const netAmt = Math.max(sentAmt - feeAmt, 0);
+
+  $('p-sent').textContent = formatMoney(sentAmt, sym);
+  $('p-feeLabel').textContent = $('feeLabel').value || 'Fee';
+  $('p-fee').textContent = feeAmt > 0 ? ('− ' + formatMoney(feeAmt, sym)) : formatMoney(0, sym);
+  $('p-amount').textContent = formatMoney(netAmt, sym);
+
+  const whole = Math.floor(netAmt);
+  const paise = Math.round((netAmt - whole) * 100);
+  let wordsStr = numToWords(whole) + ' ' + currencyName(sym);
+  if(paise > 0){ wordsStr += ' and ' + numToWords(paise) + ' ' + (sym === '$' ? 'cents' : 'paise'); }
+  wordsStr += ' only';
+  $('p-words').textContent = wordsStr.charAt(0).toUpperCase() + wordsStr.slice(1);
+
+  $('p-senderName').textContent = $('senderName').value || '—';
+  $('p-senderAcc').textContent = $('senderAcc').value || '—';
+  $('p-receiverName').textContent = $('receiverName').value || '—';
+  $('p-receiverAcc').textContent = $('receiverAcc').value || '—';
+
+  const bankVal = $('receiverBank').value;
+  if(bankVal){
+    $('p-receiverBank').textContent = bankVal;
+    $('p-receiverBankWrap').style.display = 'block';
+  } else {
+    $('p-receiverBankWrap').style.display = 'none';
+  }
+
+  const dt = $('txnDate').value;
+  if(dt){
+    const d = new Date(dt);
+    $('p-date').textContent = d.toLocaleString(undefined, {dateStyle:'medium', timeStyle:'short'});
+  } else {
+    $('p-date').textContent = new
